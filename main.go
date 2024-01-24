@@ -1,8 +1,11 @@
 package main
 
 import (
+	"bufio"
 	"flag"
 	"fmt"
+	"log"
+	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -76,6 +79,8 @@ func decodeLineArt(input string) string {
 
 func main() {
 	// Brackets balande, first item digit, space between, some value after space
+	multipleLines := flag.Bool("m", false, "Enable to enter multiple lines of input")
+
 	flag.Parse()
 	args := flag.Args()
 	fmt.Println(args)
@@ -86,6 +91,7 @@ func main() {
 		fmt.Println("This displays: #####-_-_-_-_-_-#####")
 		fmt.Println()
 	}
+
 	if len(args) == 0 {
 		displayHelpMessage()
 		return
@@ -94,13 +100,35 @@ func main() {
 		return
 	}
 
-	lineOfArt := flag.Args()[0]
-
-	result := decodeLineArt(lineOfArt)
+	var result string
+	if *multipleLines {
+		decodeMultipleLines(&result)
+	} else {
+		lineOfArt := flag.Args()[0]
+		result = decodeLineArt(lineOfArt)
+	}
 
 	if result == "" {
 		fmt.Println("Error")
 	} else {
 		fmt.Println(result)
+	}
+}
+
+func decodeMultipleLines(result *string) {
+	fmt.Println("input text:")
+	scanner := bufio.NewScanner(os.Stdin)
+	for {
+		scanner.Scan()
+		line := scanner.Text()
+		if len(line) == 0 {
+			break
+		}
+		*result += decodeLineArt(line) + "\n"
+	}
+
+	err := scanner.Err()
+	if err != nil {
+		log.Fatal(err)
 	}
 }

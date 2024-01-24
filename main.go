@@ -37,10 +37,7 @@ func checkForBalancedBrackets(input string) bool {
 			stack = stack[:len(stack)-1]
 		}
 	}
-	if len(stack) == 0 {
-		return true
-	}
-	return false
+	return len(stack) == 0
 }
 
 func isValidLineArt(input string) bool {
@@ -83,35 +80,35 @@ func main() {
 
 	flag.Parse()
 	args := flag.Args()
-	fmt.Println(args)
 
 	displayHelpMessage := func() {
 		fmt.Println("To run the program, use the following command (for example):")
-		fmt.Println("go run . [5 #][5 -_]-[5 #]")
+		fmt.Println(`go run . "[5 #][5 -_]-[5 #]"`)
 		fmt.Println("This displays: #####-_-_-_-_-_-#####")
 		fmt.Println()
-	}
-
-	if len(args) == 0 {
-		displayHelpMessage()
-		return
-	} else if len(args) != 1 {
-		fmt.Println("The program only accepts one input. You entered too many.")
-		return
 	}
 
 	var result string
 	if *multipleLines {
 		decodeMultipleLines(&result)
+		fmt.Println(result)
 	} else {
+		if len(args) == 0 {
+			displayHelpMessage()
+			return
+		} else if len(args) != 1 {
+			fmt.Println("The program only accepts one input. You entered too many.")
+			return
+		}
+
 		lineOfArt := flag.Args()[0]
 		result = decodeLineArt(lineOfArt)
-	}
 
-	if result == "" {
-		fmt.Println("Error")
-	} else {
-		fmt.Println(result)
+		if result == "" {
+			fmt.Println("Error")
+		} else {
+			fmt.Println(result)
+		}
 	}
 }
 

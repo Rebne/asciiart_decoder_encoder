@@ -27,17 +27,25 @@ func init() {
 func main() {
 	// Brackets balande, first item digit, space between, some value after space
 	multipleLines := flag.Bool("m", false, "Enable to enter multiple lines of input")
-	encodeLine := flag.Bool("e", false, "Select encoding mode for input line")
+	toEncode := flag.Bool("e", false, "Select encoding mode for input line")
+	writeToOutput := flag.Bool("o", false, "Write output to specified file")
+	readInputFromFile := flag.Bool("i", false, "Read input from a file")
+	readFromFileAndWriteToFile := flag.Bool("io", false, "Read input from file & write this to output file")
 	flag.Parse()
 	args := flag.Args()
-	lineOfArt := flag.Args()[0]
+
+	if *readFromFileAndWriteToFile {
+		*readInputFromFile = true
+		*writeToOutput = true
+	}
 
 	var result string
-	if *encodeLine {
-		result = encodeLineArt(lineOfArt)
-	} else if *multipleLines {
-
-		decodeMultipleLines(&result)
+	if *multipleLines || *readInputFromFile {
+		if *readInputFromFile {
+			decodeMultipleLinesFromFile(&result, *toEncode)
+		} else {
+			decodeMultipleLines(&result, *toEncode)
+		}
 	} else {
 
 		if len(args) == 0 {
@@ -47,12 +55,21 @@ func main() {
 			fmt.Println("The program only accepts one input. You entered too many.")
 			return
 		}
-		result = decodeLineArt(lineOfArt)
+
+		lineOfArt := args[0]
+		if *toEncode {
+			result = encodeLineArt(lineOfArt)
+		} else {
+			result = decodeLineArt(lineOfArt)
+		}
 	}
 
 	if result == "" {
 		fmt.Println("Error")
 	} else {
+		if *writeToOutput {
+			writeStringToOutput()
+		}
 		fmt.Println(result)
 	}
 }
@@ -70,7 +87,10 @@ func checkForBalancedBrackets(input string) bool {
 			stack = stack[:len(stack)-1]
 		}
 	}
-	return len(stack) == 0
+	if len(stack) == 0 {
+		return true
+	}
+	return false
 }
 
 func isValidLineArt(input string) bool {
@@ -147,7 +167,7 @@ func decodeLineArt(input string) string {
 
 }
 
-func decodeMultipleLines(result *string) {
+func decodeMultipleLines(result *string, toEncode bool) {
 	fmt.Println("input text:")
 	scanner := bufio.NewScanner(os.Stdin)
 	for {
@@ -156,7 +176,11 @@ func decodeMultipleLines(result *string) {
 		if len(line) == 0 {
 			break
 		}
-		*result += decodeLineArt(line) + "\n"
+		if toEncode {
+			*result += encodeLineArt(line) + "\n"
+		} else {
+			*result += decodeLineArt(line) + "\n"
+		}
 	}
 
 	err := scanner.Err()

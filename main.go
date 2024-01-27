@@ -31,7 +31,9 @@ func main() {
 	writeToOutput := flag.Bool("o", false, "Write output to specified file")
 	readInputFromFile := flag.Bool("i", false, "Read input from a file")
 	readFromFileAndWriteToFile := flag.Bool("io", false, "Read input from file & write this to output file")
+
 	flag.Parse()
+
 	args := flag.Args()
 
 	if *readFromFileAndWriteToFile {
@@ -42,7 +44,17 @@ func main() {
 	var result string
 	if *multipleLines || *readInputFromFile {
 		if *readInputFromFile {
-			decodeMultipleLinesFromFile(&result, *toEncode)
+			if len(args) == 0 {
+				fmt.Println("Path to file not inserted")
+				return
+			} else if len(args) != 1 {
+				fmt.Println("Too many paths to file inserted")
+				return
+			}
+
+			path := args[0]
+
+			decodeMultipleLinesFromFile(&result, path, *toEncode)
 		} else {
 			decodeMultipleLines(&result, *toEncode)
 		}
@@ -68,10 +80,34 @@ func main() {
 		fmt.Println("Error")
 	} else {
 		if *writeToOutput {
-			writeStringToOutput()
+			return
 		}
 		fmt.Println(result)
 	}
+}
+
+func decodeMultipleLinesFromFile(result *string, path string, toEncode bool) {
+	// Opening file with os.Open
+	file, err := os.Open(path)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+
+	for scanner.Scan() {
+		if toEncode {
+			*result += encodeLineArt(scanner.Text()) + "\n"
+		} else {
+			*result += decodeLineArt(scanner.Text()) + "\n"
+		}
+	}
+
+	if err := scanner.Err(); err != nil {
+		log.Fatal(err)
+	}
+
 }
 
 func checkForBalancedBrackets(input string) bool {

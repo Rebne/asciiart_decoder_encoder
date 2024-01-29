@@ -15,13 +15,16 @@ var expressionForCheck string
 var expressionForDecoding string
 var regexForCheck *regexp.Regexp
 var regexForDecoding *regexp.Regexp
+var outputFile string
 
 func init() {
-	expressionForCheck = `\[[^\d] [^\[]+\]|\[\d \]|\[\d[^ ].*[^\[]\]`
+	expressionForCheck = `\[[^\d]+ [^\[]+\]|\[\d \]|\[\d[^\s\]]*\]`
 	regexForCheck = regexp.MustCompile(expressionForCheck)
 
 	expressionForDecoding = `\[\d [^\[]+\]|.`
 	regexForDecoding = regexp.MustCompile(expressionForDecoding)
+
+
 }
 
 func main() {
@@ -33,12 +36,18 @@ func main() {
 	readFromFileAndWriteToFile := flag.Bool("io", false, "Read input from file & write this to output file")
 
 	flag.Parse()
-
 	args := flag.Args()
+
 
 	if *readFromFileAndWriteToFile {
 		*readInputFromFile = true
 		*writeToOutput = true
+	}
+
+	if *readInputFromFile == true && writeToOutput == true {
+		outputFile = args[1]
+	} else if *writeToOutput{
+		outputFile = args[0]
 	}
 
 	var result string
@@ -48,22 +57,28 @@ func main() {
 				fmt.Println("Path to file not inserted")
 				return
 			} else if len(args) != 1 {
-				fmt.Println("Too many paths to file inserted")
-				return
+				if *writeToOutput && len(args) == 2 {
+				} else {
+					fmt.Println("Too many paths to file inserted")
+					return
+				}
 			}
 
 			path := args[0]
 
-			decodeMultipleLinesFromFile(&result, path, *toEncode)
+			decodeMultipleLinesFromFile(path, *toEncode)
 		} else {
-			decodeMultipleLines(&result, *toEncode)
+			decodeMultipleLines(*toEncode)
 		}
 	} else {
 
 		if len(args) == 0 {
-			displayHelpMessage()
+			fmt.Println("To run the program, use the following command (for example):")
+			fmt.Println("go run . [5 #][5 -_]-[5 #]")
+			fmt.Println("This displays: #####-_-_-_-_-_-#####")
+			fmt.Println()
 			return
-		} else if len(args) != 1 {
+		} else if len(args) != 1 && !*writeToOutput {
 			fmt.Println("The program only accepts one input. You entered too many.")
 			return
 		}
@@ -73,6 +88,21 @@ func main() {
 			result = encodeLineArt(lineOfArt)
 		} else {
 			result = decodeLineArt(lineOfArt)
+		}
+
+		if *writeToOutput {
+			file, err := os.Open(outputFile) {
+				if err != nil {
+					log.Fatal(err)
+				}
+				defer file.Close()
+			}
+
+			_, err = file.WriteString(content)
+			if err != nil {
+				fmt.Println("Error writing to file:", err)
+				return
+			}
 		}
 	}
 
@@ -86,8 +116,16 @@ func main() {
 	}
 }
 
-func decodeMultipleLinesFromFile(result *string, path string, toEncode bool) {
+func decodeMultipleLinesFromFile(path string, toEncode bool) {
 	// Opening file with os.Open
+	writeToOutput := outputFile != ""
+	if writeToOutput {
+		oFile, err := os.Open(outputFile)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer oFile.Close()
+	}
 	file, err := os.Open(path)
 	if err != nil {
 		log.Fatal(err)
@@ -95,12 +133,30 @@ func decodeMultipleLinesFromFile(result *string, path string, toEncode bool) {
 	defer file.Close()
 
 	scanner := bufio.NewScanner(file)
-
+	var result string
 	for scanner.Scan() {
 		if toEncode {
-			*result += encodeLineArt(scanner.Text()) + "\n"
+			result = encodeLineArt(scanner.Text())
+			fmt.Println(result)
+			if writeToOutput {
+				_, err = file.WriteString(result)
+				if err != nil {
+					fmt.Println("Error writing to file:", err)
+					return
+				}
+			}
+
 		} else {
-			*result += decodeLineArt(scanner.Text()) + "\n"
+			result = decodeLineArt(scanner.Text())
+			fmt.Println(result)
+			if writeToOutput {
+				_, err = file.WriteString(content)
+				if err != nil {
+					fmt.Println("Error writing to file:", err)
+					return
+				}
+
+			}
 		}
 	}
 
@@ -223,11 +279,4 @@ func decodeMultipleLines(result *string, toEncode bool) {
 	if err != nil {
 		log.Fatal(err)
 	}
-}
-
-func displayHelpMessage() {
-	fmt.Println("To run the program, use the following command (for example):")
-	fmt.Println("go run . [5 #][5 -_]-[5 #]")
-	fmt.Println("This displays: #####-_-_-_-_-_-#####")
-	fmt.Println()
 }

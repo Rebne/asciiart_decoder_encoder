@@ -74,9 +74,14 @@ func main() {
 			writeSliceToFile(&result, outputPath)
 		}
 
-		for _, line := range result {
-			fmt.Println(line)
+		PaintAsRainbow(result)
+
+		for range result {
+			fmt.Println()
 		}
+		// for _, line := range result {
+		// 	fmt.Println(line)
+		// }
 	} else {
 
 		if len(args) == 0 {

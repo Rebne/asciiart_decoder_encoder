@@ -41,7 +41,20 @@ func main() {
 		*writeToOutput = true
 	}
 
+	var outputPath string
+	if *writeToOutput {
+		if *readInputFromFile && len(args) != 2 {
+			fmt.Println("Not a proper amount of arguments")
+			return
+		} else if *readInputFromFile {
+			outputPath = args[1]
+		} else {
+			outputPath = args[0]
+		}
+	}
+
 	if *multipleLines || *readInputFromFile {
+		var result []string
 		if *readInputFromFile {
 			if len(args) == 0 {
 				fmt.Println("Path to file not inserted")
@@ -51,11 +64,18 @@ func main() {
 				return
 			}
 
-			path := args[0]
+			inputPath := args[0]
 
-			decodeMultipleLinesFromFile(&result, path, *toEncode)
+			result = decodeMultipleLinesFromFile(inputPath, *toEncode)
 		} else {
-			decodeMultipleLines(&result, *toEncode)
+			result = decodeMultipleLines(*toEncode)
+		}
+		if *writeToOutput {
+			writeSliceToFile(&result, outputPath)
+		}
+
+		for _, line := range result {
+			fmt.Println(line)
 		}
 	} else {
 
@@ -68,24 +88,38 @@ func main() {
 		}
 
 		lineOfArt := args[0]
+
+		var result string
 		if *toEncode {
-			result := encodeLineArt(lineOfArt)
+			result = encodeLineArt(lineOfArt)
 		} else {
-			result := decodeLineArt(lineOfArt)
+			result = decodeLineArt(lineOfArt)
 		}
 
 		if result == "" {
 			fmt.Println("Error")
 		} else {
 			if *writeToOutput {
-				return
+				writeStringToFile(result, outputPath)
 			}
 			fmt.Println(result)
 		}
 	}
 }
 
-func decodeMultipleLinesFromFile(result *string, path string, toEncode bool) {
+func writeStringToFile(input string, path string) {
+	f, err := os.Create("file.txt")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer f.Close()
+
+	_, err = f.WriteString("Hello, World!\n")
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+func decodeMultipleLinesFromFile(path string, toEncode bool) []string {
 	// Opening file with os.Open
 	file, err := os.Open(path)
 	if err != nil {
@@ -95,17 +129,21 @@ func decodeMultipleLinesFromFile(result *string, path string, toEncode bool) {
 
 	scanner := bufio.NewScanner(file)
 
+	result := []string{}
+
 	for scanner.Scan() {
 		if toEncode {
-			*result += encodeLineArt(scanner.Text()) + "\n"
+			result = append(result, encodeLineArt(scanner.Text()))
 		} else {
-			*result += decodeLineArt(scanner.Text()) + "\n"
+			result = append(result, decodeLineArt(scanner.Text()))
 		}
 	}
 
 	if err := scanner.Err(); err != nil {
 		log.Fatal(err)
 	}
+
+	return result
 
 }
 
@@ -122,10 +160,7 @@ func checkForBalancedBrackets(input string) bool {
 			stack = stack[:len(stack)-1]
 		}
 	}
-	if len(stack) == 0 {
-		return true
-	}
-	return false
+	return len(stack) == 0
 }
 
 func isValidLineArt(input string) bool {
@@ -202,9 +237,11 @@ func decodeLineArt(input string) string {
 
 }
 
-func decodeMultipleLines(result *string, toEncode bool) {
+func decodeMultipleLines(toEncode bool) []string {
 	fmt.Println("input text:")
 	scanner := bufio.NewScanner(os.Stdin)
+	result := []string{}
+
 	for {
 		scanner.Scan()
 		line := scanner.Text()
@@ -212,15 +249,32 @@ func decodeMultipleLines(result *string, toEncode bool) {
 			break
 		}
 		if toEncode {
-			*result += encodeLineArt(line) + "\n"
+			result = append(result, encodeLineArt(line))
 		} else {
-			*result += decodeLineArt(line) + "\n"
+			result = append(result, decodeLineArt(line))
 		}
 	}
 
 	err := scanner.Err()
 	if err != nil {
 		log.Fatal(err)
+	}
+
+	return result
+}
+
+func writeSliceToFile(slice *[]string, path string) {
+	f, err := os.Create(path)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer f.Close()
+
+	for _, line := range *slice {
+		_, err := fmt.Fprintln(f, line)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 }
 

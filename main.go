@@ -17,7 +17,7 @@ var regexForCheck *regexp.Regexp
 var regexForDecoding *regexp.Regexp
 
 func init() {
-	expressionForCheck = `\[[^\d] [^\[]+\]|\[\d \]|\[\d[^ ].*[^\[]\]`
+	expressionForCheck = `\[[^\d]+ [^\[]+\]|\[\d \]|\[\d[^\s\]]*\]`
 	regexForCheck = regexp.MustCompile(expressionForCheck)
 
 	expressionForDecoding = `\[\d [^\[]+\]|.`
@@ -41,7 +41,6 @@ func main() {
 		*writeToOutput = true
 	}
 
-	var result string
 	if *multipleLines || *readInputFromFile {
 		if *readInputFromFile {
 			if len(args) == 0 {
@@ -70,19 +69,19 @@ func main() {
 
 		lineOfArt := args[0]
 		if *toEncode {
-			result = encodeLineArt(lineOfArt)
+			result := encodeLineArt(lineOfArt)
 		} else {
-			result = decodeLineArt(lineOfArt)
+			result := decodeLineArt(lineOfArt)
 		}
-	}
 
-	if result == "" {
-		fmt.Println("Error")
-	} else {
-		if *writeToOutput {
-			return
+		if result == "" {
+			fmt.Println("Error")
+		} else {
+			if *writeToOutput {
+				return
+			}
+			fmt.Println(result)
 		}
-		fmt.Println(result)
 	}
 }
 

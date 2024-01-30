@@ -6,7 +6,7 @@ const (
 	bold = "\x1b[0m"
 )
 
-func main() {
+func paintAsRainbow(inputSlice []string) {
 	rainbowColors := map[int]string{
 		1: "\x1b[31m",             // Red
 		2: "\x1b[33m",             // Yellow

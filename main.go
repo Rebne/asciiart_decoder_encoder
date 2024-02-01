@@ -20,7 +20,7 @@ func init() {
 	expressionForCheck = `\[[^\d]+ [^\[]+\]|\[\d \]|\[\d[^\s\]]*\]`
 	regexForCheck = regexp.MustCompile(expressionForCheck)
 
-	expressionForDecoding = `\[\d [^\[]+\]|.`
+	expressionForDecoding = `\[\d+ [^\[]+\]|.`
 	regexForDecoding = regexp.MustCompile(expressionForDecoding)
 }
 
@@ -109,8 +109,8 @@ func main() {
 
 func getInputFromUser(ptr *string, s string) {
 
-	fmt.Printf("Enter path to %s:", s)
-	_, err := fmt.Scan(s)
+	fmt.Printf("Enter path to %s: ", s)
+	_, err := fmt.Scan(ptr)
 
 	if err != nil {
 		fmt.Println("Error reading input:", err)
@@ -119,19 +119,18 @@ func getInputFromUser(ptr *string, s string) {
 }
 
 func writeStringToFile(input string, path string) {
-	f, err := os.Create("file.txt")
+	f, err := os.Create(path)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer f.Close()
 
-	_, err = f.WriteString("Hello, World!\n")
+	_, err = f.WriteString(input)
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 func decodeMultipleLinesFromFile(path string, toEncode bool) []string {
-	// Opening file with os.Open
 	file, err := os.Open(path)
 	if err != nil {
 		log.Fatal(err)

@@ -31,6 +31,7 @@ func main() {
 	writeToOutput := flag.Bool("o", false, "Write output to specified file")
 	readInputFromFile := flag.Bool("i", false, "Read input from a file")
 	readFromFileAndWriteToFile := flag.Bool("io", false, "Read input from file & write this to output file")
+	toColorOutput := flag.Bool("c", false, "Select color for stdout")
 
 	flag.Parse()
 
@@ -69,7 +70,7 @@ func main() {
 			writeSliceToFile(&result, outputPath)
 		}
 
-		PaintAsRainbow(result)
+		addColorToText()
 
 		for range result {
 			fmt.Println()

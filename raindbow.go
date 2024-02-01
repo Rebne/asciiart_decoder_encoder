@@ -2,8 +2,51 @@ package main
 
 import "fmt"
 
-func PaintAsRainbow(asciiArt []string) {
-	bold := "\x1b[0m"
+const (
+	reset = "\x1b[0m"
+)
+
+func addColorToText(arr []string) []string {
+	fmt.Println("1 Red")
+	fmt.Println("2 Green")
+	fmt.Println("3 Blue")
+	fmt.Println("4 Rainbow")
+	fmt.Print("Insert number for color: ")
+
+	var color string
+	_, err := fmt.Scan(&color)
+
+	if err != nil {
+		fmt.Println("Error reading input:", err)
+		return []string{}
+	}
+
+	switch color {
+	case "1":
+		return paintStringToColor(arr, color)
+	case "2":
+		return paintStringToColor(arr, color)
+	case "3":
+		return paintStringToColor(arr, color)
+	case "4":
+		return
+	}
+
+}
+
+func paintStringToColor(arr []string, key string) []string {
+	colors := map[string]string{
+		"1": "\x1b[91m", // BrightRed
+		"2": "\x1b[92m", // BrightGreen
+		"3": "\x1b[94m", // BrightBlue
+	}
+	for i := range arr {
+		arr[i] = colors[key] + arr[i] + reset
+	}
+
+	return arr
+}
+func paintAsRainbow(asciiArt []string) []string {
 	rainbowColors := map[int]string{
 		1: "\x1b[31m",             // Red
 		2: "\x1b[33m",             // Yellow
@@ -27,23 +70,24 @@ func PaintAsRainbow(asciiArt []string) {
 		}
 	}
 
+	// color := 0
+	// var full string
+	// for i := range result {
+	// 	for _, val := range result[i] {
+	// 		full += val
+	// 	}
+	// 	full = rainbowColors[color+1] + full + reset
+	// 	fmt.Println(full)
+	// 	full = ""
+	// 	color = (color + 1) % 7
+
+	// }
+
+	// for range result {
+	// 	fmt.Println()
+	// }
+
 	color := 0
-	var full string
-	for i := range result {
-		for _, val := range result[i] {
-			full += val
-		}
-		full = rainbowColors[color+1] + full + bold
-		fmt.Println(full)
-		full = ""
-		color = (color + 1) % 7
-
-	}
-
-	for range result {
-		fmt.Println()
-	}
-	color = 0
 
 	for idx := range result[longestRow] {
 		row, col := longestRow, idx
@@ -53,7 +97,7 @@ func PaintAsRainbow(asciiArt []string) {
 				continue
 			}
 			if col < len(result[row]) {
-				result[row][col] = rainbowColors[color+1] + result[row][col] + bold
+				result[row][col] = rainbowColors[color+1] + result[row][col] + reset
 			}
 			row--
 		}
@@ -64,7 +108,7 @@ func PaintAsRainbow(asciiArt []string) {
 				continue
 			}
 			if col < len(result[row]) {
-				result[col][row] = rainbowColors[color+1] + result[row][col] + bold
+				result[col][row] = rainbowColors[color+1] + result[row][col] + reset
 			}
 			row++
 		}

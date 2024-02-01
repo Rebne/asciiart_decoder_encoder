@@ -42,30 +42,25 @@ func main() {
 	}
 
 	var outputPath string
-	if *writeToOutput {
-		if *readInputFromFile && len(args) != 2 {
-			fmt.Println("Not a proper amount of arguments")
+	var inputPath string
+
+	if *readInputFromFile {
+		getInputFromUser(&inputPath, "input")
+		if inputPath == "" {
 			return
-		} else if *readInputFromFile {
-			outputPath = args[1]
-		} else {
-			outputPath = args[0]
+		}
+	}
+
+	if *writeToOutput {
+		getInputFromUser(&outputPath, "output")
+		if outputPath == "" {
+			return
 		}
 	}
 
 	if *multipleLines || *readInputFromFile {
 		var result []string
 		if *readInputFromFile {
-			if len(args) == 0 {
-				fmt.Println("Path to file not inserted")
-				return
-			} else if len(args) != 1 {
-				fmt.Println("Too many paths to file inserted")
-				return
-			}
-
-			inputPath := args[0]
-
 			result = decodeMultipleLinesFromFile(inputPath, *toEncode)
 		} else {
 			result = decodeMultipleLines(*toEncode)
@@ -109,6 +104,17 @@ func main() {
 			}
 			fmt.Println(result)
 		}
+	}
+}
+
+func getInputFromUser(ptr *string, s string) {
+
+	fmt.Printf("Enter path to %s:", s)
+	_, err := fmt.Scan(s)
+
+	if err != nil {
+		fmt.Println("Error reading input:", err)
+		return
 	}
 }
 

@@ -18,7 +18,7 @@ func addColorToText(arr []string) []string {
 
 	if err != nil {
 		fmt.Println("Error reading input:", err)
-		return []string{}
+		return nil
 	}
 
 	switch color {
@@ -29,7 +29,11 @@ func addColorToText(arr []string) []string {
 	case "3":
 		return paintStringToColor(arr, color)
 	case "4":
-		return
+		return paintAsRainbow(arr)
+	default:
+		fmt.Println("Invalid number inserted. No coloring added.")
+		return nil
+
 	}
 
 }
@@ -46,6 +50,7 @@ func paintStringToColor(arr []string, key string) []string {
 
 	return arr
 }
+
 func paintAsRainbow(asciiArt []string) []string {
 	rainbowColors := map[int]string{
 		1: "\x1b[31m",             // Red
@@ -56,71 +61,55 @@ func paintAsRainbow(asciiArt []string) []string {
 		6: "\x1b[34m",             // Blue
 		7: "\x1b[35m",             // Magenta
 	}
-	// Print the ANSI code values for each color
 
 	longestRow := 0
-	result := [][]string{}
+	charArray := [][]string{}
 	for i := range asciiArt {
-		result = append(result, make([]string, 0))
+		charArray = append(charArray, make([]string, 0))
 		for _, char := range asciiArt[i] {
-			result[i] = append(result[i], string(char))
+			charArray[i] = append(charArray[i], string(char))
 		}
-		if len(result[i]) > len(result[longestRow]) {
+		if len(charArray[i]) > len(charArray[longestRow]) {
 			longestRow = i
 		}
 	}
 
-	// color := 0
-	// var full string
-	// for i := range result {
-	// 	for _, val := range result[i] {
-	// 		full += val
-	// 	}
-	// 	full = rainbowColors[color+1] + full + reset
-	// 	fmt.Println(full)
-	// 	full = ""
-	// 	color = (color + 1) % 7
-
-	// }
-
-	// for range result {
-	// 	fmt.Println()
-	// }
-
 	color := 0
 
-	for idx := range result[longestRow] {
+	for idx := range charArray[longestRow] {
 		row, col := longestRow, idx
 		for row >= 0 {
-			if col < len(result[row]) && result[row][col] == " " {
+			if col < len(charArray[row]) && charArray[row][col] == " " {
 				row--
 				continue
 			}
-			if col < len(result[row]) {
-				result[row][col] = rainbowColors[color+1] + result[row][col] + reset
+			if col < len(charArray[row]) {
+				charArray[row][col] = rainbowColors[color+1] + charArray[row][col] + reset
 			}
 			row--
 		}
 		row = longestRow + 1
-		for row < len(result) {
-			if result[row][col] == " " {
+		for row < len(charArray) {
+			if charArray[row][col] == " " {
 				row++
 				continue
 			}
-			if col < len(result[row]) {
-				result[col][row] = rainbowColors[color+1] + result[row][col] + reset
+			if col < len(charArray[row]) {
+				charArray[col][row] = rainbowColors[color+1] + charArray[row][col] + reset
 			}
 			row++
 		}
 		color = (color + 1) % 7
 	}
+	result := []string{}
 	var tmp string
-	for i := range result {
-		for _, val := range result[i] {
+	for i := range charArray {
+		for _, val := range charArray[i] {
 			tmp += val
 		}
-		fmt.Println(tmp)
+		result = append(result, tmp)
 		tmp = ""
 	}
+	return result
 
 }

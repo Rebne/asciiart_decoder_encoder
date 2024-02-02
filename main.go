@@ -70,14 +70,17 @@ func main() {
 			writeSliceToFile(&result, outputPath)
 		}
 
-		addColorToText()
-
-		for range result {
-			fmt.Println()
+		if *toColorOutput {
+			tmp := addColorToText(result)
+			if tmp != nil {
+				result = tmp
+			}
 		}
-		// for _, line := range result {
-		// 	fmt.Println(line)
-		// }
+		fmt.Println()
+		for _, line := range result {
+			fmt.Println(line)
+		}
+		fmt.Println()
 	} else {
 
 		if len(args) == 0 {
@@ -97,13 +100,21 @@ func main() {
 			result = decodeLineArt(lineOfArt)
 		}
 
+		if *toColorOutput {
+			tmp := addColorToText([]string{result})
+			if tmp != nil {
+				result = tmp[0]
+			}
+		}
+
 		if result == "" {
 			fmt.Println("Error")
 		} else {
 			if *writeToOutput {
 				writeStringToFile(result, outputPath)
 			}
-			fmt.Println(result)
+
+			fmt.Println("\n" + result + "\n")
 		}
 	}
 }

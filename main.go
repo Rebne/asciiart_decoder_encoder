@@ -31,7 +31,7 @@ func main() {
 	writeToOutput := flag.Bool("o", false, "Write output to specified file")
 	readInputFromFile := flag.Bool("i", false, "Read input from a file")
 	readFromFileAndWriteToFile := flag.Bool("io", false, "Read input from file & write this to output file")
-	toColorOutput := flag.Bool("c", false, "Select color for stdout")
+	toColor := flag.Bool("c", false, "Select color for stdout")
 
 	flag.Parse()
 
@@ -70,7 +70,7 @@ func main() {
 			writeSliceToFile(&result, outputPath)
 		}
 
-		if *toColorOutput {
+		if *toColor {
 			tmp := addColorToText(result)
 			if tmp != nil {
 				result = tmp
@@ -100,7 +100,7 @@ func main() {
 			result = decodeLineArt(lineOfArt)
 		}
 
-		if *toColorOutput {
+		if *toColor {
 			tmp := addColorToText([]string{result})
 			if tmp != nil {
 				result = tmp[0]

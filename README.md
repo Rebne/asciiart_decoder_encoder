@@ -24,9 +24,8 @@ go run . -m -e
 ### Decode multiple lines from a file and write to an output file  
 go run . -io input.txt output.txt  
 
-## Features
-
-**Balanced Brackets Check**: Ensures the input has balanced square brackets.  
+## Bonus features
+ 
 **Colorful Output**: Optionally adds color to the decoded ASCII art for a visually appealing display.  
 **File Input/Output**: Supports reading input from files and writing output to files.  
 
@@ -34,12 +33,12 @@ go run . -io input.txt output.txt
 
 ### Encoding
 
-**Input:** [5 #][5 -_]-[5 #]
+**Input:** [5 #][5 %+]+[5 #]
 
-**Output:** #####-_-_-_-_-_-#####
+**Output:** #####%+%+%+%+%++#####
 
 ### Decoding
 
-**Input:** #####-_-_-_-_-_-#####
+**Input:** #####%+%+%+%+%+=#####
 
 **Output:** [5 #][5 -_]-[5 #]

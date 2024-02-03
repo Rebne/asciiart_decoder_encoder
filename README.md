@@ -15,13 +15,14 @@ Options include:
 - `-io`: Read input from file & write this to output file
 - `-c`: Select color for stdout
 
-**Encode a single line**
+#### Encode a single line  
 go run . -e "[5 #][5 -_]-[5 #]"
 
-**Encode multiple lines from the console**
+#### Encode multiple lines from the console  
 go run . -m -e
 
-**Decode multiple lines from a file and write to an output file**Examples
+#### Decode multiple lines from a file and write to an output file  
+Examples
 Encoding
 
 Input: [5 #][5 -_]-[5 #]

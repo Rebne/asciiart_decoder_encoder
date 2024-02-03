@@ -22,18 +22,17 @@ go run . -e "[5 #][5 -_]-[5 #]"
 go run . -m -e
 
 #### Decode multiple lines from a file and write to an output file  
-Examples
-Encoding
+go run . -io input.txt output.txt  
 
-Input: [5 #][5 -_]-[5 #]
+## Examples
 
-Output: #####-_-_-_-_-_-#####
-Decoding
+#### Encoding
+Input: [5 #][5 -_]-[5 #]  
+Output: #####-_-_-_-_-_-#####  
 
-Input: #####-_-_-_-_-_-#####
-
-Output: [5 #][5 -_]-[5 #]
-go run . -io input.txt output.txt 
+#### Decoding
+Input: #####-_-_-_-_-_-#####  
+Output: [5 #][5 -_]-[5 #]  
 
 ## Features
 

@@ -66,9 +66,15 @@ func main() {
 		} else {
 			result = decodeMultipleLines(*toEncode)
 		}
+
+		if result == nil {
+			fmt.Println("Error")
+			return
+		}
 		if *writeToOutput {
 			writeSliceToFile(&result, outputPath)
 		}
+
 		if *toColor {
 			tmp := addColorToText(result)
 			if tmp != nil {
@@ -156,7 +162,11 @@ func decodeMultipleLinesFromFile(path string, toEncode bool) []string {
 		if toEncode {
 			result = append(result, encodeLineArt(scanner.Text()))
 		} else {
-			result = append(result, decodeLineArt(scanner.Text()))
+			tmp := decodeLineArt(scanner.Text())
+			if tmp == "" {
+				return nil
+			}
+			result = append(result, tmp)
 		}
 	}
 
@@ -272,7 +282,11 @@ func decodeMultipleLines(toEncode bool) []string {
 		if toEncode {
 			result = append(result, encodeLineArt(line))
 		} else {
-			result = append(result, decodeLineArt(line))
+			tmp := decodeLineArt(line)
+			if tmp == "" {
+				return nil
+			}
+			result = append(result, tmp)
 		}
 	}
 

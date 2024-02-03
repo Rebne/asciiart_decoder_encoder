@@ -39,6 +39,6 @@ go run . -io input.txt output.txt
 
 ### Decoding
 
-**Input:** #####%+%+%+%+%+=#####
+**Input:** #####%+%+%+%+%++#####
 
-**Output:** [5 #][5 -_]-[5 #]
+**Output:** [5 #][5 %+]+[5 #]

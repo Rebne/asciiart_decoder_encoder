@@ -90,12 +90,12 @@ func paintAsRainbow(asciiArt []string) []string {
 		}
 		row = longestRow + 1
 		for row < len(charArray) {
-			if charArray[row][col] == " " {
+			if col < len(charArray[row]) && charArray[row][col] == " " {
 				row++
 				continue
 			}
 			if col < len(charArray[row]) {
-				charArray[col][row] = rainbowColors[color+1] + charArray[row][col] + reset
+				charArray[row][col] = rainbowColors[color+1] + charArray[row][col] + reset
 			}
 			row++
 		}

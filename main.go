@@ -69,7 +69,6 @@ func main() {
 		if *writeToOutput {
 			writeSliceToFile(&result, outputPath)
 		}
-
 		if *toColor {
 			tmp := addColorToText(result)
 			if tmp != nil {

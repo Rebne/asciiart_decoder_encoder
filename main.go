@@ -100,9 +100,9 @@ func main() {
 
 		var result string
 		if *toEncode {
-			result = encodeLineArt(lineOfArt)
+			result = encodeLine(lineOfArt)
 		} else {
-			result = decodeLineArt(lineOfArt)
+			result = decodeLine(lineOfArt)
 		}
 
 		if *toColor {
@@ -160,9 +160,9 @@ func decodeMultipleLinesFromFile(path string, toEncode bool) []string {
 
 	for scanner.Scan() {
 		if toEncode {
-			result = append(result, encodeLineArt(scanner.Text()))
+			result = append(result, encodeLine(scanner.Text()))
 		} else {
-			tmp := decodeLineArt(scanner.Text())
+			tmp := decodeLine(scanner.Text())
 			if tmp == "" {
 				return nil
 			}
@@ -204,14 +204,17 @@ func isValidLineArt(input string) bool {
 	return true
 }
 
-func encodeLineArt(input string) string {
+func encodeLine(input string) string {
 	var resultArray []string
 	length := len(input)
 
+	// Splitting the input to slice/array for reworking into encoded version later.
 	for i := 0; i < length; i++ {
 		if i+1 < length && input[i] == input[i+1] {
 			resultArray = append(resultArray, string(input[i]))
-		} else if i+2 < length && input[i] == input[i+2] {
+		} else if i+2 < length && input[i] == input[i+2] ||
+			len(resultArray) > 0 && len(resultArray[len(resultArray)-1]) != 1 &&
+				input[i:i+2] == resultArray[len(resultArray)-1] {
 			resultArray = append(resultArray, input[i:i+2])
 			i++
 		} else {
@@ -219,6 +222,10 @@ func encodeLineArt(input string) string {
 		}
 	}
 
+	fmt.Println(resultArray)
+
+	// Constructing result string from the array by counting consecutive elements
+	// and encoding if there are at least 4 consecutive elements
 	var result string
 	var count int
 	i := 0
@@ -227,13 +234,8 @@ func encodeLineArt(input string) string {
 		if i+1 < length && resultArray[i] == resultArray[i+1] {
 			count++
 		} else {
-			if count >= 3 {
+			if count > 0 {
 				result += fmt.Sprintf(`[%d %s]`, count+1, resultArray[i])
-				count = 0
-			} else if count > 0 {
-				for j := 0; j <= count; j++ {
-					result += resultArray[i]
-				}
 				count = 0
 			} else {
 				result += resultArray[i]
@@ -244,7 +246,7 @@ func encodeLineArt(input string) string {
 	return result
 }
 
-func decodeLineArt(input string) string {
+func decodeLine(input string) string {
 	matches := regexForDecoding.FindAllString(input, -1)
 	var result string
 	for _, match := range matches {
@@ -280,9 +282,9 @@ func decodeMultipleLines(toEncode bool) []string {
 			break
 		}
 		if toEncode {
-			result = append(result, encodeLineArt(line))
+			result = append(result, encodeLine(line))
 		} else {
-			tmp := decodeLineArt(line)
+			tmp := decodeLine(line)
 			if tmp == "" {
 				return nil
 			}

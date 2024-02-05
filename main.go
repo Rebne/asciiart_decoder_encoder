@@ -81,11 +81,16 @@ func main() {
 				result = tmp
 			}
 		}
-		fmt.Println()
+		var newline string
+
+		if !*toEncode {
+			newline = "\n"
+		}
+		fmt.Print(newline)
 		for _, line := range result {
 			fmt.Println(line)
 		}
-		fmt.Println()
+		fmt.Print(newline)
 	} else {
 
 		if len(args) == 0 {
@@ -112,6 +117,7 @@ func main() {
 			}
 		}
 
+		var newline string
 		if result == "" {
 			fmt.Println("Error")
 		} else {
@@ -119,7 +125,11 @@ func main() {
 				writeStringToFile(result, outputPath)
 			}
 
-			fmt.Println("\n" + result + "\n")
+			if !*toEncode {
+				newline = "\n"
+			}
+
+			fmt.Println(newline + result + newline)
 		}
 	}
 }
@@ -221,8 +231,6 @@ func encodeLine(input string) string {
 			resultArray = append(resultArray, string(input[i]))
 		}
 	}
-
-	fmt.Println(resultArray)
 
 	// Constructing result string from the array by counting consecutive elements
 	// and encoding if there are at least 4 consecutive elements

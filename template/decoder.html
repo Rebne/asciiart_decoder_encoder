@@ -1,0 +1,11 @@
+{{define "head"}}<title>Art decoder</title>{{end}}
+{{define "body"}}
+<table>
+{{range .}}
+    <tr>
+        <td>{{.}}</td>
+    </tr>
+{{end}}
+</table><br>
+<a href="/">Generate another</a>
+{{end}}

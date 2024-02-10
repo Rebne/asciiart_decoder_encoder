@@ -1,14 +1,12 @@
 package main
 
 import (
-	"bufio"
-	"flag"
 	"fmt"
-	"log"
-	"os"
+	"net/http"
 	"regexp"
 	"strconv"
 	"strings"
+	"text/template"
 )
 
 var expressionForCheck string
@@ -16,202 +14,49 @@ var expressionForDecoding string
 var regexForCheck *regexp.Regexp
 var regexForDecoding *regexp.Regexp
 
+var templates map[string]*template.Template
+
 func init() {
 	expressionForCheck = `\[[^\d]+ [^\[]+\]|\[\d \]|\[\d[^\s\]]*\]`
 	regexForCheck = regexp.MustCompile(expressionForCheck)
 
 	expressionForDecoding = `\[\d+ [^\[]+\]|.`
 	regexForDecoding = regexp.MustCompile(expressionForDecoding)
+
+	if templates == nil {
+		templates = make(map[string]*template.Template)
+	}
+	templates["index"] = template.Must(template.ParseFiles("template/index.html", "template/base.html"))
+	templates["decode"] = template.Must(template.ParseFiles("template/decoder.html", "template/base.html"))
 }
 
 func main() {
-	// Brackets balande, first item digit, space between, some value after space
-	multipleLines := flag.Bool("m", false, "Enable to enter multiple lines of input")
-	toEncode := flag.Bool("e", false, "Select encoding mode for input line")
-	writeToOutput := flag.Bool("o", false, "Write output to specified file")
-	readInputFromFile := flag.Bool("i", false, "Read input from a file")
-	readFromFileAndWriteToFile := flag.Bool("io", false, "Read input from file & write this to output file")
-	toColor := flag.Bool("c", false, "Select color for stdout")
 
-	flag.Parse()
-
-	args := flag.Args()
-
-	if *readFromFileAndWriteToFile {
-		*readInputFromFile = true
-		*writeToOutput = true
-	}
-
-	var outputPath string
-	var inputPath string
-
-	if *readInputFromFile {
-		getInputFromUser(&inputPath, "input")
-		if inputPath == "" {
-			return
-		}
-	}
-
-	if *writeToOutput {
-		getInputFromUser(&outputPath, "output")
-		if outputPath == "" {
-			return
-		}
-	}
-
-	if *multipleLines || *readInputFromFile {
-		var result []string
-		if *readInputFromFile {
-			result = decodeMultipleLinesFromFile(inputPath, *toEncode)
-		} else {
-			result = decodeMultipleLines(*toEncode)
-		}
-
-		if result == nil {
-			fmt.Println("Error")
-			return
-		}
-		if *writeToOutput {
-			writeSliceToFile(&result, outputPath)
-		}
-
-		if *toColor {
-			tmp := addColorToText(result)
-			if tmp != nil {
-				result = tmp
-			}
-		}
-		var newline string
-
-		if !*toEncode {
-			newline = "\n"
-		}
-		fmt.Print(newline)
-		for _, line := range result {
-			fmt.Println(line)
-		}
-		fmt.Print(newline)
-	} else {
-
-		if len(args) == 0 {
-			displayHelpMessage()
-			return
-		} else if len(args) != 1 {
-			fmt.Println("The program only accepts one input. You entered too many.")
-			return
-		}
-
-		lineOfArt := args[0]
-
-		var result string
-		if *toEncode {
-			result = encodeLine(lineOfArt)
-		} else {
-			result = decodeLine(lineOfArt)
-		}
-
-		if *toColor {
-			tmp := addColorToText([]string{result})
-			if tmp != nil {
-				result = tmp[0]
-			}
-		}
-
-		var newline string
-		if result == "" {
-			fmt.Println("Error")
-		} else {
-			if *writeToOutput {
-				writeStringToFile(result, outputPath)
-			}
-
-			if !*toEncode {
-				newline = "\n"
-			}
-
-			fmt.Println(newline + result + newline)
-		}
-	}
+	http.HandleFunc("/", getIndex)
+	http.HandleFunc("/decoder", decodePage)
+	http.ListenAndServe(":8088", nil)
 }
 
-func getInputFromUser(ptr *string, s string) {
+func getIndex(w http.ResponseWriter, r *http.Request) {
+	renderTemplate(w, "index", "base", nil)
+}
 
-	fmt.Printf("Enter path to %s: ", s)
-	_, err := fmt.Scan(ptr)
+func decodePage(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+	input := r.PostFormValue("input")
+	result := decodeMultipleLines(false, input)
+	renderTemplate(w, "decode", "base", result)
+}
 
+func renderTemplate(w http.ResponseWriter, name string, template string, viewModel interface{}) {
+	tmpl, ok := templates[name]
+	if !ok {
+		http.Error(w, "The template does not exist", http.StatusInternalServerError)
+	}
+	err := tmpl.ExecuteTemplate(w, template, viewModel)
 	if err != nil {
-		fmt.Println("Error reading input:", err)
-		return
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
-}
-
-func writeStringToFile(input string, path string) {
-	f, err := os.Create(path)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer f.Close()
-
-	_, err = f.WriteString(input)
-	if err != nil {
-		log.Fatal(err)
-	}
-}
-func decodeMultipleLinesFromFile(path string, toEncode bool) []string {
-	file, err := os.Open(path)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer file.Close()
-
-	scanner := bufio.NewScanner(file)
-
-	result := []string{}
-
-	for scanner.Scan() {
-		if toEncode {
-			result = append(result, encodeLine(scanner.Text()))
-		} else {
-			tmp := decodeLine(scanner.Text())
-			if tmp == "" {
-				return nil
-			}
-			result = append(result, tmp)
-		}
-	}
-
-	if err := scanner.Err(); err != nil {
-		log.Fatal(err)
-	}
-
-	return result
-
-}
-
-func checkForBalancedBrackets(input string) bool {
-	stack := []rune{}
-
-	for _, char := range input {
-		if char == '[' {
-			stack = append(stack, char)
-		} else if char == ']' {
-			if len(stack) == 0 || stack[len(stack)-1] != '[' {
-				return false
-			}
-			stack = stack[:len(stack)-1]
-		}
-	}
-	return len(stack) == 0
-}
-
-func isValidLineArt(input string) bool {
-	if !checkForBalancedBrackets(input) {
-		return false
-	}
-	if regexForCheck.MatchString(input) {
-		return false
-	}
-	return true
 }
 
 func encodeLine(input string) string {
@@ -278,54 +123,45 @@ func decodeLine(input string) string {
 
 }
 
-func decodeMultipleLines(toEncode bool) []string {
-	fmt.Println("input text:")
-	scanner := bufio.NewScanner(os.Stdin)
-	result := []string{}
+func decodeMultipleLines(e bool, s string) []string {
 
-	for {
-		scanner.Scan()
-		line := scanner.Text()
-		if len(line) == 0 {
-			break
+	array := strings.Split(s, "\n")
+
+	if e {
+		for i, line := range array {
+			array[i] = encodeLine(line)
 		}
-		if toEncode {
-			result = append(result, encodeLine(line))
-		} else {
-			tmp := decodeLine(line)
-			if tmp == "" {
-				return nil
+	} else {
+		for i, line := range array {
+			array[i] = decodeLine(line)
+		}
+	}
+
+	return array
+}
+
+func checkForBalancedBrackets(input string) bool {
+	stack := []rune{}
+
+	for _, char := range input {
+		if char == '[' {
+			stack = append(stack, char)
+		} else if char == ']' {
+			if len(stack) == 0 || stack[len(stack)-1] != '[' {
+				return false
 			}
-			result = append(result, tmp)
+			stack = stack[:len(stack)-1]
 		}
 	}
-
-	err := scanner.Err()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return result
+	return len(stack) == 0
 }
 
-func writeSliceToFile(slice *[]string, path string) {
-	f, err := os.Create(path)
-	if err != nil {
-		log.Fatal(err)
+func isValidLineArt(input string) bool {
+	if !checkForBalancedBrackets(input) {
+		return false
 	}
-	defer f.Close()
-
-	for _, line := range *slice {
-		_, err := fmt.Fprintln(f, line)
-		if err != nil {
-			log.Fatal(err)
-		}
+	if regexForCheck.MatchString(input) {
+		return false
 	}
-}
-
-func displayHelpMessage() {
-	fmt.Println("To run the program, use the following command (for example):")
-	fmt.Println("go run . [5 #][5 -_]-[5 #]")
-	fmt.Println("This displays: #####-_-_-_-_-_-#####")
-	fmt.Println()
+	return true
 }

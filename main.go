@@ -2,11 +2,11 @@ package main
 
 import (
 	"fmt"
+	"html/template"
 	"net/http"
 	"regexp"
 	"strconv"
 	"strings"
-	"text/template"
 )
 
 var expressionForCheck string
@@ -45,6 +45,9 @@ func decodePage(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	input := r.PostFormValue("input")
 	result := decodeMultipleLines(false, input)
+	// for _, line := range result {
+	// 	fmt.Println(line)
+	// }
 	renderTemplate(w, "decode", "base", result)
 }
 

@@ -33,8 +33,21 @@ func init() {
 func main() {
 
 	http.HandleFunc("/", getIndex)
-	http.HandleFunc("/decoder", decodePage)
+	http.HandleFunc("/method", chooseMethod)
 	http.ListenAndServe(":8088", nil)
+}
+
+func chooseMethod(w http.ResponseWriter, r *http.Request) {
+	method := r.FormValue("processMethod")
+
+	switch method {
+	case "decode":
+		decodePage(w, r)
+	case "encode":
+		encodePage(w, r)
+	default:
+		http.Error(w, "Invalid action", http.StatusBadRequest)
+	}
 }
 
 func getIndex(w http.ResponseWriter, r *http.Request) {
@@ -50,7 +63,6 @@ func decodePage(w http.ResponseWriter, r *http.Request) {
 
 	currData.Array = decodeMultipleLines(false, input)
 	// Handling malformed string and returning status BadRequest
-	fmt.Println(currData.Array)
 	if len(currData.Array) == 0 {
 		currData.StatusCode = http.StatusBadRequest
 		renderTemplate(w, "index", "base", currData)
@@ -62,6 +74,20 @@ func decodePage(w http.ResponseWriter, r *http.Request) {
 		// }
 		renderTemplate(w, "decode", "base", currData)
 	}
+}
+
+func encodePage(w http.ResponseWriter, r *http.Request) {
+	var currData Data
+	r.ParseForm()
+	input := r.PostFormValue("input")
+
+	currData.Array = decodeMultipleLines(true, input)
+	currData.StatusCode = http.StatusAccepted
+
+	// for _, line := range result {
+	// 	fmt.Println(line)
+	// }
+	renderTemplate(w, "decode", "base", currData)
 }
 
 type Data struct {

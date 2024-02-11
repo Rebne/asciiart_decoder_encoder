@@ -1,5 +1,6 @@
 {{define "head"}}<title>Art decoder</title>{{end}}
 {{define "body"}}
-<pre>{{range .}}{{.}}{{end}}</pre>
+<pre>{{range .Array}}{{.}}{{end}}</pre>
 <form action="/" method="GET"><input type="submit" value="Generate another"></form>
-{{end}}
+<p>Status code: {{.StatusCode}}</p>
+{{end}} 

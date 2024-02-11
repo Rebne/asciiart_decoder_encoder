@@ -38,17 +38,35 @@ func main() {
 }
 
 func getIndex(w http.ResponseWriter, r *http.Request) {
-	renderTemplate(w, "index", "base", nil)
+	var currData Data
+	currData.StatusCode = http.StatusOK
+	renderTemplate(w, "index", "base", currData)
 }
 
 func decodePage(w http.ResponseWriter, r *http.Request) {
+	var currData Data
 	r.ParseForm()
 	input := r.PostFormValue("input")
-	result := decodeMultipleLines(false, input)
-	// for _, line := range result {
-	// 	fmt.Println(line)
-	// }
-	renderTemplate(w, "decode", "base", result)
+
+	currData.Array = decodeMultipleLines(false, input)
+	// Handling malformed string and returning status BadRequest
+	fmt.Println(currData.Array)
+	if len(currData.Array) == 0 {
+		currData.StatusCode = http.StatusBadRequest
+		renderTemplate(w, "index", "base", currData)
+	} else {
+		currData.StatusCode = http.StatusAccepted
+
+		// for _, line := range result {
+		// 	fmt.Println(line)
+		// }
+		renderTemplate(w, "decode", "base", currData)
+	}
+}
+
+type Data struct {
+	Array      []string
+	StatusCode int
 }
 
 func renderTemplate(w http.ResponseWriter, name string, template string, viewModel interface{}) {
@@ -132,10 +150,17 @@ func decodeMultipleLines(e bool, s string) []string {
 
 	if e {
 		for i, line := range array {
+			if array[i] == "" {
+				return nil
+			}
 			array[i] = encodeLine(line)
 		}
 	} else {
 		for i, line := range array {
+			// checking for error
+			if array[i] == "" {
+				return nil
+			}
 			array[i] = decodeLine(line)
 		}
 	}

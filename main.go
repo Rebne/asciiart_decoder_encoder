@@ -30,69 +30,47 @@ func init() {
 	templates["decode"] = template.Must(template.ParseFiles("template/decoder.html", "template/base.html"))
 }
 
-func main() {
-
-	http.HandleFunc("/", getIndex)
-	http.HandleFunc("/method", chooseMethod)
-	http.ListenAndServe(":8088", nil)
-}
-
-func chooseMethod(w http.ResponseWriter, r *http.Request) {
-	method := r.FormValue("processMethod")
-
-	switch method {
-	case "decode":
-		decodePage(w, r)
-	case "encode":
-		encodePage(w, r)
-	default:
-		http.Error(w, "Invalid action", http.StatusBadRequest)
-	}
-}
-
-func getIndex(w http.ResponseWriter, r *http.Request) {
-	var currData Data
-	currData.StatusCode = http.StatusOK
-	renderTemplate(w, "index", "base", currData)
-}
-
-func decodePage(w http.ResponseWriter, r *http.Request) {
-	var currData Data
-	r.ParseForm()
-	input := r.PostFormValue("input")
-
-	currData.Array = decodeMultipleLines(false, input)
-	// Handling malformed string and returning status BadRequest
-	if len(currData.Array) == 0 {
-		currData.StatusCode = http.StatusBadRequest
-		renderTemplate(w, "index", "base", currData)
-	} else {
-		currData.StatusCode = http.StatusAccepted
-
-		// for _, line := range result {
-		// 	fmt.Println(line)
-		// }
-		renderTemplate(w, "decode", "base", currData)
-	}
-}
-
-func encodePage(w http.ResponseWriter, r *http.Request) {
-	var currData Data
-	r.ParseForm()
-	input := r.PostFormValue("input")
-
-	currData.Array = decodeMultipleLines(true, input)
-	currData.StatusCode = http.StatusAccepted
-
-	// for _, line := range result {
-	// 	fmt.Println(line)
-	// }
-	renderTemplate(w, "decode", "base", currData)
-}
-
 type Data struct {
 	Array      []string
 	StatusCode int
+}
+
+func main() {
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		var data Data
+		data.StatusCode = http.StatusOK
+
+		if r.Method == "POST" {
+			r.ParseForm()
+			input := r.FormValue("input")
+			choice := r.FormValue("processMethod")
+
+			var result []string
+
+			switch choice {
+			case "decode":
+				result = decodeMultipleLines(false, input)
+			case "encode":
+				result = decodeMultipleLines(true, input)
+			default:
+				result = nil
+			}
+
+			data := Data{
+				Array: result,
+			}
+			if result == nil {
+				data.StatusCode = http.StatusBadRequest
+			} else {
+				data.StatusCode = http.StatusAccepted
+			}
+			renderTemplate(w, "decode", "base", data)
+			return
+
+		}
+		renderTemplate(w, "index", "base", data)
+	})
+	http.ListenAndServe(":8088", nil)
 }
 
 func renderTemplate(w http.ResponseWriter, name string, template string, viewModel interface{}) {

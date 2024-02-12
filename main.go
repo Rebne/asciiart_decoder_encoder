@@ -129,10 +129,6 @@ func decodeLine(input string) string {
 	var result string
 	for _, match := range matches {
 		if match[0] == '[' {
-			if !isValidLineArt(match) {
-				return ""
-			}
-
 			var num int
 			index := 0
 			for match[index] != ' ' {
@@ -154,21 +150,17 @@ func decodeMultipleLines(e bool, s string) []string {
 
 	if e {
 		for i, line := range array {
-			if array[i] == "" {
-				return nil
-			}
 			array[i] = encodeLine(line)
 		}
 	} else {
 		for i, line := range array {
 			// checking for error
-			if array[i] == "" {
+			if !isValidLineArt(line) {
 				return nil
 			}
 			array[i] = decodeLine(line)
 		}
 	}
-
 	return array
 }
 

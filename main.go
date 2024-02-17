@@ -71,7 +71,7 @@ func main() {
 		}
 		renderTemplate(w, "index", "base", data)
 	})
-	http.ListenAndServe(":8088", nil)
+	http.ListenAndServe(":80", nil)
 }
 
 func renderTemplate(w http.ResponseWriter, name string, template string, viewModel interface{}) {

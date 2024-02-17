@@ -1,6 +1,9 @@
 {{define "base"}}
 <html>
-  <head>{{template "head" .}}</head>
+  <head>
+    <link rel="stylesheet" type="text/css" href="/static/style.css">
+    {{template "head" .}}
+  </head>
   <body>{{template "body" .}}</body>
 </html>
 {{end}}

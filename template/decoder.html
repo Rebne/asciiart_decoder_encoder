@@ -1,6 +1,8 @@
 {{define "head"}}<title>Art decoder</title>{{end}}
 {{define "body"}}
-<pre>{{range .Array}}{{.}}{{end}}</pre>
-<form action="/" method="GET"><input type="submit" value="Generate another"></form>
-<p>Status code: {{.StatusCode}}</p>
+<div class="container">
+    <pre>{{range .Array}}{{.}}{{end}}</pre>
+    <form action="/" method="GET"><input type="submit" value="Generate another" id="another-button"></form>
+    <p>Status code: {{.StatusCode}}</p>
+</div>
 {{end}} 

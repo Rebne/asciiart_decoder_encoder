@@ -1,0 +1,79 @@
+body {
+    font-family: 'Courier New', Courier, monospace;
+    background-color: #2b2a33;
+    color: white;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+form {
+    text-align: center;
+}
+
+.heading {
+    margin: 0;
+    margin-bottom: 10px;
+}
+
+textarea {
+    color: white;
+    background-color: #42414d;
+    border-radius: 10px;
+    border-color: #42414d;
+    font-size: large;
+}
+textarea:focus {
+    outline: 2px solid #bebebe;
+    outline-offset: -2px;
+}
+
+input[type="radio"] {
+    appearance: none;
+    background-color: #42414d;
+    border: 0.15em solid 42414d;
+    border-radius: 50%;
+    color: #42414d;
+    width: 1.15em;
+    height: 1.15em;
+
+}
+
+#decode:checked {
+    background-color: #007bff;
+    border-color: #007bff;
+  }
+#encode:checked {
+    background-color: #f12e5e;
+    border-color: #f12e5e; 
+}
+p {
+    margin-top: 10px;
+}
+
+input[type="submit"] {
+    background-color: #42414d;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    font-family: Arial, sans-serif; 
+    font-size: 16px; 
+}
+
+input[type="submit"]:hover {
+    background-color: #007bff;
+    cursor: pointer; 
+}
+
+#another-button {
+    margin-top: 20px;
+}
+pre {
+    font-size: x-large;
+}

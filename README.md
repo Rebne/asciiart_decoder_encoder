@@ -1,44 +1,27 @@
 # Line Art Encoder/Decoder
 
-## Description
-This is a Go program that encodes and decodes line art. It provides various options including encoding multiple lines of input, reading input from a file, writing output to a file, and adding color to the output.
+This is a simple web application for encoding and decoding line art. It allows users to encode a line art drawing into a compressed format and decode it back to its original form.
+
+## Features
+
+- **Encoding:** Converts a line art drawing into a compressed format by replacing consecutive characters with a count and character combination, enclosed in square brackets.
+- **Decoding:** Reverts the encoded line art back to its original form.
+- **Web Interface:** Provides a user-friendly web interface for users to input their line art and choose between encoding and decoding.
+
+## Installation
+
+1. Clone the repository:
+   git clone https://gitea.kood.tech/rene-anterohogren/art.git
+2. Navigate to project directory
+3. Run the code:
+   go run .
+4. Access the application in your web browser at http://localhost:80
 
 ## Usage
-To run the program, use the following command:
-bash go run . [options] [input]
 
-Options include:
-- `-m`: Enable to enter multiple lines of input
-- `-e`: Select encoding mode for input line
-- `-o`: Write output to specified file
-- `-i`: Read input from a file
-- `-io`: Read input from file & write this to output file
-- `-c`: Select color for stdout
+1. Input your line art into the provided text area.  
+2. Choose whether you want to encode or decode the line art.  
+3. Click the "Generate" button.
+4. The result will be displayed on a new page.
+5. Click "Generate another" to generate another one.
 
-### Encode a single line  
-go run . -e "[5 #][5 -_]-[5 #]"
-
-### Encode multiple lines from the console  
-go run . -m -e
-
-### Decode multiple lines from a file and write to an output file  
-go run . -io input.txt output.txt  
-
-## Bonus features
- 
-**Colorful Output**: Optionally adds color to the decoded ASCII art for a visually appealing display.  
-**File Input/Output**: Supports reading input from files and writing output to files.  
-
-## Examples
-
-### Encoding
-
-**Input:** [5 #][5 %+]+[5 #]
-
-**Output:** #####%+%+%+%+%++#####
-
-### Decoding
-
-**Input:** #####%+%+%+%+%++#####
-
-**Output:** [5 #][5 %+]+[5 #]

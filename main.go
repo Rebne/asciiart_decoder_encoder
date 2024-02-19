@@ -36,11 +36,19 @@ type Data struct {
 }
 
 func main() {
-	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		var data Data
-		data.StatusCode = http.StatusOK
+	var data Data
 
+	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
+
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		data.StatusCode = http.StatusOK
+		if r.Method == "GET" {
+			renderTemplate(w, "index", "base", data)
+			return
+		}
+	})
+
+	http.HandleFunc("/decode", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "POST" {
 			r.ParseForm()
 			input := r.FormValue("input")
@@ -57,9 +65,7 @@ func main() {
 				result = nil
 			}
 
-			data := Data{
-				Array: result,
-			}
+			data.Array = result
 			if result == nil {
 				data.StatusCode = http.StatusBadRequest
 			} else {
@@ -69,9 +75,9 @@ func main() {
 			return
 
 		}
-		renderTemplate(w, "index", "base", data)
 	})
-	http.ListenAndServe(":80", nil)
+
+	http.ListenAndServe(":8080", nil)
 }
 
 func renderTemplate(w http.ResponseWriter, name string, template string, viewModel interface{}) {

@@ -10,12 +10,10 @@ This is a simple web application for encoding and decoding line art. It allows u
 
 ## Installation
 
-1. Clone the repository:  
-   git clone https://gitea.kood.tech/rene-anterohogren/art.git
-2. Navigate to project directory
-3. Run the code:  
+1. Navigate to project directory
+2. Run the code:  
    go run main.go
-4. Access the application in your web browser at http://localhost:80
+3. Access the application in your web browser at http://localhost:80
 
 ## Usage
 
